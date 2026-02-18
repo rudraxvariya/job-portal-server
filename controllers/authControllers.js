@@ -15,16 +15,21 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user) throw new UnauthorizedError("Invalid credentials");
+
   const isValidUser =
     user && (await comparePassword(req.body.password, user.password));
+
   if (!isValidUser) throw new UnauthorizedError("Invalid credentials");
-  const token = createToken({ userId: user._id });
+
+  const token = createToken({ userId: user._id, role: user.role });
   const oneDay = 1000 * 60 * 60 * 24;
+
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: new Date(Date.now() + oneDay),
   });
+
   res.status(StatusCodes.OK).json({ msg: "User logged in successfully" });
 };
 

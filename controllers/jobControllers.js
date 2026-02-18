@@ -3,18 +3,19 @@ import { StatusCodes } from "http-status-codes";
 import { NotFoundError } from "../errors/customErrors.js";
 
 export const getAllJobs = async (req, res) => {
-  const jobs = await Job.find({});
+  const jobs = await Job.find({ createdBy: req.user.userId });
   res.status(StatusCodes.OK).json({ jobs });
 };
 
 export const createJob = async (req, res) => {
+  req.body.createdBy = req.user.userId;
   const { company, position } = req.body;
   if (!company || !position) {
     return res
       .status(StatusCodes.NOT_ACCEPTABLE)
       .json({ msg: "please provide company and position" });
   }
-  const job = await Job.create({ company, position });
+  const job = await Job.create(req.body);
   res.status(StatusCodes.CREATED).json({ job });
 };
 

@@ -5,7 +5,7 @@ import {
   login,
   getUsers,
   deleteUser,
-} from "../controllers/userControllers.js";
+} from "../controllers/authControllers.js";
 import {
   validateRegisterInput,
   validateLoginInput,
