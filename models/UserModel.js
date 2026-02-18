@@ -17,6 +17,14 @@ export const UserSchema = new mongoose.Schema({
     enum: ["admin", "user"],
     default: "user",
   },
+  avatar: String,
+  avatarPublicId: String,
 });
+
+UserSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
+};
 
 export default mongoose.model("User", UserSchema);

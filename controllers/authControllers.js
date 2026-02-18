@@ -33,14 +33,10 @@ export const login = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "User logged in successfully" });
 };
 
-export const getUsers = async (req, res) => {
-  const users = await User.find({}).select("-password");
-  res.status(StatusCodes.OK).json({ users, count: users.length });
-};
-
-export const deleteUser = async (req, res) => {
-  const { id } = req.params;
-  const user = await User.findByIdAndDelete(id);
-  if (!user) throw new NotFoundError("User not found");
-  res.status(StatusCodes.OK).json({ msg: "User deleted successfully", user });
+export const logout = async (req, res) => {
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.status(StatusCodes.OK).json({ msg: "User logged out successfully" });
 };
