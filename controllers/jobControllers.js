@@ -11,8 +11,8 @@ export const getAllJobs = async (req, res) => {
   };
   if (search) {
     queryObject.$or = [
-      { position: { $regex: search } },
-      { company: { $regex: search } },
+      { position: { $regex: search, $options: "i" } },
+      { company: { $regex: search, $options: "i" } },
     ];
   }
   if (jobStatus && jobStatus !== "all") {
