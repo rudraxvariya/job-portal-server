@@ -6,7 +6,7 @@ export const authenticateUser = (req, res, next) => {
   if (!token) throw new UnauthorizedError("Unauthorized User");
   try {
     const { userId, role } = verifyJWT(token);
-    const testUser = userId === "6995a6f3a86e4ce4dd6966bb";
+    const testUser = userId === process.env.TEST_USER_ID;
     req.user = { userId, role, testUser };
     next();
   } catch (error) {

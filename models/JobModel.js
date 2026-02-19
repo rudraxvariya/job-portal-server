@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 const JobSchema = new mongoose.Schema(
   {
     company: String,
+    companyLogo: String,
+    companyLogoPublicId: String,
     position: String,
     jobStatus: {
       type: String,

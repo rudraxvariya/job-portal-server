@@ -13,15 +13,27 @@ import {
   validateJobInput,
 } from "../middleware/validateMiddleware.js";
 import { checkForTestUser } from "../middleware/authMiddleware.js";
+import upload from "../middleware/multerMiddleware.js";
 
 router
   .route("/")
   .get(getAllJobs)
-  .post(checkForTestUser, validateJobInput, createJob);
+  .post(
+    checkForTestUser,
+    upload.single("companyLogo"),
+    validateJobInput,
+    createJob,
+  );
 router
   .route("/:id")
   .get(validateIdParam, getSingleJob)
-  .patch(checkForTestUser, validateJobInput, validateIdParam, updateJob)
+  .patch(
+    checkForTestUser,
+    upload.single("companyLogo"),
+    validateJobInput,
+    validateIdParam,
+    updateJob,
+  )
   .delete(checkForTestUser, validateIdParam, deleteJob);
 
 export default router;

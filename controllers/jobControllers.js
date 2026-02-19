@@ -1,6 +1,8 @@
 import Job from "../models/JobModel.js";
 import { StatusCodes } from "http-status-codes";
 import { NotFoundError } from "../errors/customErrors.js";
+import cloudinary from "cloudinary";
+import { promises as fs } from "fs";
 
 export const getAllJobs = async (req, res) => {
   const jobs = await Job.find({ createdBy: req.user.userId });
@@ -8,42 +10,52 @@ export const getAllJobs = async (req, res) => {
 };
 
 export const createJob = async (req, res) => {
-  req.body.createdBy = req.user.userId;
-  const job = await Job.create(req.body);
-  res.status(StatusCodes.CREATED).json({ job });
+  const newJob = { ...req.body };
+  newJob.createdBy = req.user.userId;
+
+  if (req.file) {
+    const response = await cloudinary.v2.uploader.upload(req.file.path);
+    await fs.unlink(req.file.path);
+    newJob.companyLogo = response.secure_url;
+    newJob.companyLogoPublicId = response.public_id;
+  }
+  const updatedJob = await Job.create(newJob);
+  res.status(StatusCodes.CREATED).json({ updatedJob });
 };
 
 export const getSingleJob = async (req, res) => {
-  const { id } = req.params;
-  const job = await Job.findById(id);
-  if (!job) throw new NotFoundError(`No job with id ${id}`);
+  const job = await Job.findById(req.params.id);
+  if (!job) throw new NotFoundError(`No job with id ${req.params.id}`);
   return res.status(200).json({ job });
 };
 
 export const updateJob = async (req, res) => {
-  const { company, position } = req.body;
-  if (!company || !position) {
-    return res
-      .status(StatusCodes.NOT_ACCEPTABLE)
-      .json({ msg: "please provide company and position details" });
+  const existingJob = await Job.findById(req.params.id);
+  if (!existingJob) throw new NotFoundError("No job found with the id");
+
+  const newJob = { ...req.body };
+  if (req.file) {
+    const response = await cloudinary.v2.uploader.upload(req.file.path);
+    await fs.unlink(req.file.path);
+    newJob.companyLogo = response.secure_url;
+    newJob.companyLogoPublicId = response.public_id;
   }
-  const { id } = req.params;
-
-  const updatedJob = await Job.findOneAndUpdate({ _id: id }, req.body, {
-    new: true,
-  });
-  if (!updatedJob) throw new NotFoundError("No job found with the id");
-
+  const updatedJob = await Job.findOneAndUpdate(
+    { _id: req.params.id },
+    newJob,
+    {
+      new: true,
+    },
+  );
+  // Delete the OLD image from Cloudinary
+  if (req.file && existingJob.companyLogoPublicId) {
+    await cloudinary.v2.uploader.destroy(existingJob.companyLogoPublicId);
+  }
   res.status(StatusCodes.OK).json({ msg: "Job modified", updatedJob });
 };
 
 export const deleteJob = async (req, res) => {
-  const { id } = req.params;
-  if (!id) {
-    return res.status(400).json("Please provide id");
-  }
-
-  const removeJobs = await Job.findByIdAndDelete(id);
+  const removeJobs = await Job.findByIdAndDelete(req.params.id);
   if (!removeJobs) throw new NotFoundError("No job found with the id");
 
   res.status(200).json({ msg: "job deleted successfully!", job: removeJobs });
