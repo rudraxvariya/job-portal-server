@@ -5,6 +5,8 @@ import morgan from "morgan";
 import express from "express";
 import mongoose from "mongoose";
 import cloudinary from "cloudinary";
+import helmet from "helmet";
+import cors from "cors";
 
 //router
 import jobRouter from "./routes/jobRouter.js";
@@ -32,6 +34,14 @@ app.post("/", (req, res) => {
 
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }),
+);
 
 const PORT = 5000;
 
