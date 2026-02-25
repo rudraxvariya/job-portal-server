@@ -94,8 +94,11 @@ export const updateJob = async (req, res) => {
 };
 
 export const deleteJob = async (req, res) => {
-  const removeJobs = await Job.findByIdAndDelete(req.params.id);
-  if (!removeJobs) throw new NotFoundError("No job found with the id");
-
-  res.status(200).json({ msg: "job deleted successfully!", job: removeJobs });
+  const job = await Job.findById(req.params.id);
+  if (!job) throw new NotFoundError("No job found with the id");
+  if (job.companyLogoPublicId) {
+    await cloudinary.v2.uploader.destroy(job.companyLogoPublicId);
+  }
+  await Job.findByIdAndDelete(req.params.id);
+  res.status(StatusCodes.OK).json({ msg: "job deleted successfully!" });
 };
