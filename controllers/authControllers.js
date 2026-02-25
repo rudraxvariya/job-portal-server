@@ -31,7 +31,10 @@ export const login = async (req, res) => {
     maxAge: oneDay,
   });
 
-  res.status(StatusCodes.OK).json({ msg: "User logged in successfully" });
+  res.status(StatusCodes.OK).json({
+    msg: "User logged in successfully",
+    token,
+  });
 };
 
 export const logout = async (req, res) => {
