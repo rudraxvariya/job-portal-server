@@ -1,13 +1,15 @@
+dotenv.config();
+
 import "express-async-errors";
 import * as dotenv from "dotenv";
-dotenv.config();
 import morgan from "morgan";
 import express from "express";
 import mongoose from "mongoose";
 import cloudinary from "cloudinary";
 import helmet from "helmet";
 import cors from "cors";
-
+import dns from "node:dns";
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 //router
 import jobRouter from "./routes/jobRouter.js";
 import authRouter from "./routes/authRouter.js";
@@ -47,14 +49,9 @@ const PORT = 5000;
 
 // connect to MongoDB
 try {
-  await mongoose
-    .connect(process.env.MONGO_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
-    .then(() => {
-      console.log("Connected to MongoDB");
-    });
+  await mongoose.connect(process.env.MONGO_URL).then(() => {
+    console.log("Connected to MongoDB");
+  });
   mongoose.set("strictQuery", true);
 
   app.listen(PORT, () => {
